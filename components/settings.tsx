@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useStore } from '../store';
-import { Save, User, Phone, Image as ImageIcon, Briefcase, CheckCircle } from 'lucide-react';
+import { Save, User, Phone, Image as ImageIcon, Briefcase, CheckCircle, Lock } from 'lucide-react';
 
 const SETTINGS_T = {
   en: {
@@ -11,6 +11,7 @@ const SETTINGS_T = {
     phone: 'Phone Number',
     role: 'Designation',
     logoUrl: 'Logo URL',
+    pin: 'Login PIN (4 digits)',
     save: 'Save Settings',
     success: 'Settings updated successfully!'
   },
@@ -21,6 +22,7 @@ const SETTINGS_T = {
     phone: 'ফোন নম্বর',
     role: 'পদবী',
     logoUrl: 'লোগো লিঙ্ক',
+    pin: 'লগইন পিন (৪ ডিজিট)',
     save: 'সেভ করুন',
     success: 'তথ্য সফলভাবে আপডেট হয়েছে!'
   }
@@ -139,6 +141,21 @@ const Settings: React.FC = () => {
                   className="w-full pl-14 pr-6 py-5 bg-slate-50 border-0 rounded-[2rem] outline-none font-bold text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all"
                   value={formData.image}
                   onChange={e => setFormData({ ...formData, image: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">{t.pin}</label>
+              <div className="relative">
+                <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                <input 
+                  type="password" 
+                  maxLength={4}
+                  className="w-full pl-14 pr-6 py-5 bg-slate-50 border-0 rounded-[2rem] outline-none font-bold text-slate-900 focus:ring-4 focus:ring-indigo-100 transition-all tracking-[0.5em]"
+                  value={formData.pin}
+                  onChange={e => setFormData({ ...formData, pin: e.target.value.replace(/\D/g, '') })}
                   required
                 />
               </div>
