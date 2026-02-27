@@ -56,11 +56,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => loadSettings('isLoggedIn', false));
   const [error, setError] = useState<{ message: string; code?: string } | null>(null);
   
-  const [admin, setAdmin] = useState({
+  const [admin, setAdmin] = useState<BusinessState['admin']>({
     name: 'Sylsas Admin',
     phone: '01712345678',
     role: 'Owner',
-    image: 'https://picsum.photos/seed/admin/100/100'
+    image: 'https://picsum.photos/seed/admin/100/100',
+    pin: '1234'
   });
 
   const handleFirebaseError = (err: any) => {
@@ -135,7 +136,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { saveSettings('isLoggedIn', isLoggedIn); }, [isLoggedIn]);
 
   const login = (pass: string) => {
-    if (pass === '1234') {
+    if (pass === admin.pin) {
       setIsLoggedIn(true);
       return true;
     }
