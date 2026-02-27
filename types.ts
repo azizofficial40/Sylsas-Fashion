@@ -69,5 +69,6 @@ export interface BusinessState {
     phone: string;
     role: string;
     image: string;
+    pin: string;
   };
 }
