@@ -1,6 +1,7 @@
 
 export type Size = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 export type Language = 'en' | 'bn';
+export type Theme = 'light' | 'dark';
 
 export interface StockVariant {
   size: Size;
@@ -63,6 +64,7 @@ export interface BusinessState {
   sales: Sale[];
   expenses: Expense[];
   language: Language;
+  theme: Theme;
   isLoggedIn: boolean;
   admin: {
     name: string;

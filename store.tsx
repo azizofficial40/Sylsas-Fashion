@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, Customer, Sale, Expense, BusinessState, Language } from './types';
+import { Product, Customer, Sale, Expense, BusinessState, Language, Theme } from './types';
 import { db } from './services/firebase';
 import { 
   collection, 
@@ -29,6 +29,7 @@ interface StoreContextType extends BusinessState {
   receivePayment: (customerId: string, amount: number) => Promise<void>;
   updateAdmin: (adminData: BusinessState['admin']) => Promise<void>;
   setLanguage: (lang: Language) => void;
+  toggleTheme: () => void;
   login: (pass: string) => boolean;
   logout: () => void;
   error: { message: string; code?: string } | null;
@@ -53,6 +54,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Fix: Renamed setter to setLanguageState to avoid name collision with the setLanguage function
   const [language, setLanguageState] = useState<Language>(() => loadSettings('language', 'en'));
+  const [theme, setThemeState] = useState<Theme>(() => loadSettings('theme', 'light'));
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => loadSettings('isLoggedIn', false));
   const [error, setError] = useState<{ message: string; code?: string } | null>(null);
   
@@ -133,7 +135,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [language]);
 
   useEffect(() => { saveSettings('language', language); }, [language]);
+  useEffect(() => { saveSettings('theme', theme); }, [theme]);
   useEffect(() => { saveSettings('isLoggedIn', isLoggedIn); }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const login = (pass: string) => {
     if (pass === admin.pin) {
@@ -282,14 +293,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Fix: Corrected function to call setLanguageState and resolved redeclaration by renaming useState setter
   const setLanguage = (lang: Language) => setLanguageState(lang);
+  const toggleTheme = () => setThemeState(prev => prev === 'light' ? 'dark' : 'light');
 
   return (
     <StoreContext.Provider value={{
-      products, customers, sales, expenses, admin, language, isLoggedIn,
+      products, customers, sales, expenses, admin, language, theme, isLoggedIn,
       addProduct, updateProduct, deleteProduct, addSale, deleteSale, 
       addExpense, updateExpense, deleteExpense, 
       addCustomer, updateCustomer, deleteCustomer, receivePayment,
-      updateAdmin, setLanguage, login, logout, error
+      updateAdmin, setLanguage, toggleTheme, login, logout, error
     }}>
       {children}
     </StoreContext.Provider>
