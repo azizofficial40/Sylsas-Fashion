@@ -5,8 +5,9 @@ import { Expense } from '../types';
 import { Plus, Receipt, Calendar, Trash2, X, PlusCircle } from 'lucide-react';
 
 const Expenses: React.FC = () => {
-  const { expenses, addExpense } = useStore();
+  const { expenses, addExpense, updateExpense, deleteExpense } = useStore();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newExpense, setNewExpense] = useState<Partial<Expense>>({
     category: 'Rent',
     amount: 0,
@@ -18,15 +19,38 @@ const Expenses: React.FC = () => {
 
   const handleSave = () => {
     if (newExpense.amount && newExpense.amount > 0) {
-      addExpense({
-        id: Date.now().toString(),
-        category: newExpense.category || 'Other',
-        amount: newExpense.amount,
-        notes: newExpense.notes || '',
-        date: newExpense.date || new Date().toISOString()
-      });
+      if (editingId) {
+        updateExpense({
+          id: editingId,
+          category: newExpense.category || 'Other',
+          amount: newExpense.amount,
+          notes: newExpense.notes || '',
+          date: newExpense.date || new Date().toISOString()
+        });
+      } else {
+        addExpense({
+          id: Date.now().toString(),
+          category: newExpense.category || 'Other',
+          amount: newExpense.amount,
+          notes: newExpense.notes || '',
+          date: newExpense.date || new Date().toISOString()
+        });
+      }
       setIsAdding(false);
+      setEditingId(null);
       setNewExpense({ category: 'Rent', amount: 0, notes: '', date: new Date().toISOString() });
+    }
+  };
+
+  const handleEdit = (expense: Expense) => {
+    setNewExpense(expense);
+    setEditingId(expense.id);
+    setIsAdding(true);
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this expense?')) {
+      deleteExpense(id);
     }
   };
 
@@ -39,7 +63,11 @@ const Expenses: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-slate-800">Expenses</h2>
         <button 
-          onClick={() => setIsAdding(true)}
+          onClick={() => {
+            setEditingId(null);
+            setNewExpense({ category: 'Rent', amount: 0, notes: '', date: new Date().toISOString() });
+            setIsAdding(true);
+          }}
           className="bg-indigo-600 text-white px-4 py-2.5 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-indigo-100"
         >
           <Plus size={18} /> Add New
@@ -59,7 +87,7 @@ const Expenses: React.FC = () => {
       <div className="space-y-3">
         <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Expense History</h3>
         {expenses.map(expense => (
-          <div key={expense.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between active:scale-[0.99] transition-transform">
+          <div key={expense.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center">
                 <Receipt size={20} />
@@ -72,7 +100,23 @@ const Expenses: React.FC = () => {
                 </div>
               </div>
             </div>
-            <p className="font-black text-rose-500">৳{expense.amount}</p>
+            <div className="flex items-center gap-4">
+              <p className="font-black text-rose-500">৳{expense.amount}</p>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={() => handleEdit(expense)}
+                  className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                >
+                  <PlusCircle size={18} className="rotate-45" />
+                </button>
+                <button 
+                  onClick={() => handleDelete(expense.id)}
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
           </div>
         ))}
         {expenses.length === 0 && (
@@ -84,7 +128,7 @@ const Expenses: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 z-[60] flex items-end sm:items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 animate-in slide-in-from-bottom-10">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-800">Record Expense</h3>
+              <h3 className="text-xl font-bold text-slate-800">{editingId ? 'Edit Expense' : 'Record Expense'}</h3>
               <button onClick={() => setIsAdding(false)}><X size={24} className="text-slate-400" /></button>
             </div>
             
@@ -132,7 +176,7 @@ const Expenses: React.FC = () => {
                 onClick={handleSave}
                 className="w-full py-4 bg-rose-500 text-white rounded-2xl font-bold shadow-lg shadow-rose-100 mt-4"
               >
-                Save Expense
+                {editingId ? 'Update Expense' : 'Save Expense'}
               </button>
             </div>
           </div>
